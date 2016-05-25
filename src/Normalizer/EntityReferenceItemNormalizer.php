@@ -37,6 +37,7 @@ class EntityReferenceItemNormalizer extends NormalizerBase implements Denormaliz
       return $value;
     }
 
+    $field_info = [];
     $taget_id = isset($value['target_id']) ? $value['target_id'] : NULL;
     // For user target type use the ID from multiversion configuration object.
     if ($target_type === 'user') {
@@ -55,6 +56,11 @@ class EntityReferenceItemNormalizer extends NormalizerBase implements Denormaliz
       'entity_type_id' => $target_type,
       'target_uuid' => $referenced_entity->uuid(),
     ];
+
+    // Add username to the field info for user entity type.
+    if ($target_type === 'user' && $username = $referenced_entity->getUsername()) {
+      $field_info = ['username' => $username];
+    }
 
     $bundle_key = $referenced_entity->getEntityType()->getKey('bundle');
     $bundle = $referenced_entity->bundle();
