@@ -37,7 +37,6 @@ class EntityReferenceItemNormalizer extends NormalizerBase implements Denormaliz
       return $value;
     }
 
-    $field_info = [];
     $taget_id = isset($value['target_id']) ? $value['target_id'] : NULL;
     // For user target type use the ID from multiversion configuration object.
     if ($target_type === 'user') {
