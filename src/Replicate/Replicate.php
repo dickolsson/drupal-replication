@@ -3,19 +3,10 @@
 namespace Drupal\replication\Replicate;
 
 use Doctrine\CouchDB\CouchDBClient;
-use Drupal\Core\DependencyInjection\DependencySerializationTrait;
-use Drupal\replication\Entity\ReplicationLog;
 use Relaxed\Replicator\ReplicationTask;
 use Relaxed\Replicator\Replicator;
 
 class Replicate implements ReplicateInterface {
-
-  use DependencySerializationTrait;
-
-//  /**
-//   * @var \Drupal\Core\Logger\LoggerChannelInterface
-//   */
-//  protected $logger;
 
   /**
    * @var \Doctrine\CouchDB\CouchDBClient
@@ -31,6 +22,56 @@ class Replicate implements ReplicateInterface {
    * @var array
    */
   protected $result = [];
+
+  /**
+   * @var
+   */
+  protected $repId = NULL;
+
+  /**
+   * @var bool
+   */
+  protected $continuous = FALSE;
+
+  /**
+   * @var
+   */
+  protected $filter = NULL;
+
+  /**
+   * @var bool
+   */
+  protected $createTarget = FALSE;
+
+  /**
+   * @var array|NULL
+   */
+  protected $docIds = NULL;
+
+  /**
+   * @var int
+   */
+  protected $heartbeat = 10000;
+
+  /**
+   * @var int
+   */
+  protected $timeout = 10000;
+
+  /**
+   * @var bool
+   */
+  protected $cancel;
+
+  /**
+   * @var string
+   */
+  protected $style = 'all_docs';
+
+  /**
+   * @var
+   */
+  protected $sinceSeq = 0;
 
   /**
    * {@inheritdoc}
@@ -51,8 +92,51 @@ class Replicate implements ReplicateInterface {
   /**
    * {@inheritdoc}
    */
+  public function setContinuous() {
+    $this->continuous = TRUE;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCreateTarget() {
+    $this->createTarget = TRUE;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setCancel() {
+    $this->cancel = TRUE;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setDocIds(array $doc_ids) {
+    $this->docIds = $doc_ids;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function doReplication() {
-    $task = new ReplicationTask();
+    $task = new ReplicationTask(
+      $this->repId,
+      $this->continuous,
+      $this->filter,
+      $this->createTarget,
+      $this->docIds,
+      $this->heartbeat,
+      $this->timeout,
+      $this->cancel,
+      $this->style,
+      $this->sinceSeq
+    );
     $replicator = new Replicator($this->source, $this->target, $task);
     $this->result = $replicator->startReplication();
     return $this->result;
@@ -64,27 +148,5 @@ class Replicate implements ReplicateInterface {
   public function getResult() {
     return $this->result;
   }
-
-//  protected function errorReplicationLog() {
-//    $time = new \DateTime();
-//    $history = [
-//      'start_time' => $time->format('D, d M Y H:i:s e'),
-//      'end_time' => $time->format('D, d M Y H:i:s e'),
-//      'session_id' => \md5((\microtime(true) * 1000000)),
-//      'start_last_seq' => '',
-//    ];
-//    $replication_log_id = \md5(
-//      $this->getWorkspace()->getMachineName() .
-//      $this->target
-//    );;
-//    /** @var \Drupal\replication\Entity\ReplicationLogInterface $replication_log */
-//    $replication_log = ReplicationLog::loadOrCreate($replication_log_id);
-//    $replication_log->set('ok', FALSE);
-//    //$replication_log->setSourceLastSeq($source->getWorkspace()->getUpdateSeq());
-//    $replication_log->setSessionId($history['session_id']);
-//    $replication_log->setHistory($history);
-//    $replication_log->save();
-//    return $replication_log;
-//  }
 
 }

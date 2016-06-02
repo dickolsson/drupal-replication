@@ -40,6 +40,22 @@ class ReplicateNormalizer extends NormalizerBase implements DenormalizerInterfac
   public function denormalize($data, $class, $format = NULL, array $context = []) {
     $this->replicate->setSource($data['source']);
     $this->replicate->setTarget($data['target']);
+
+    if ($data['continuous'] == TRUE) {
+      $this->replicate->setContinuous();
+    }
+
+    if ($data['cancel'] == TRUE) {
+      $this->replicate->setCancel();
+    }
+
+    if ($data['create_target'] == TRUE) {
+      $this->replicate->setCreateTarget();
+    }
+
+    if (is_array($data['doc_ids'])) {
+      $this->replicate->setDocIds($data['doc_ids']);
+    }
     
     return $this->replicate;
   }
