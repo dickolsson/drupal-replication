@@ -5,6 +5,8 @@ services:
   replication.users_mapping:
     class: Drupal\replication\UsersMapping
     arguments: ['@config.factory', '@entity_type.manager']
+  replication.replicate:
+    class: Drupal\replication\Replicate\Replicate
 
 #Factories
   replication.changes_factory:
@@ -98,3 +100,8 @@ services:
     class: Drupal\replication\Normalizer\CommentItemNormalizer
     tags:
       - { name: normalizer, priority: 10 }
+  replication.normalizer.replicate:
+    class: Drupal\replication\Normalizer\ReplicateNormalizer
+    tags:
+      - { name: normalizer, priority: 10 }
+    arguments: ['@replication.replicate']
